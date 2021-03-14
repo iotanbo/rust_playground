@@ -1,0 +1,23 @@
+[package]
+name = "mylib"
+version = "0.1.0"
+authors = ["iotanbo <yurizappo@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# TODO: add
+
+[[bin]]
+name = "main_app"
+path = "bin/main_app/main.rs"
+
+[[bin]]
+name = "single_file_exe"
+path = "bin/single_file_exe.rs"
+
+[[bin]]
+name = "multi_file_exe"
+path = "bin/multi_file_exe/main.rs"
+

@@ -1,0 +1,2 @@
+[workspace]
+members = ["mylib", "my_exe"]

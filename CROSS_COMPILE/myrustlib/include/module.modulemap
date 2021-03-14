@@ -1,0 +1,5 @@
+
+module myrustlib [system][extern_c] {
+ header "myrustlib.h"
+ export *
+}

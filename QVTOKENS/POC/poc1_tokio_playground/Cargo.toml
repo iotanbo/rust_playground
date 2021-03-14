@@ -1,0 +1,13 @@
+[package]
+name = "poc1_tokio_playground"
+version = "0.1.0"
+authors = ["iotanbo <yurizappo@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = { version = "0.3.*" }
+tokio = {version = "1", features = ["full"] }
+log = { version = "0" }
+flexi_logger = { version = "0.17" }
