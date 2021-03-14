@@ -1,10 +1,16 @@
 // https://nick.groenen.me/posts/rust-error-handling/
 
+// Big nice blog
+// https://blog.burntsushi.net/rust-error-handling/
+
 // anyhow: https://github.com/dtolnay/anyhow
 // thiserr: https://github.com/dtolnay/thiserror
 
 // From impl docs
 // https://doc.rust-lang.org/std/convert/trait.From.html
+
+
+
 
 
 use thiserror::Error;

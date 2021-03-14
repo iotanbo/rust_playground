@@ -6,7 +6,7 @@ use const_format::formatcp;
 
 /// Compile-time formatted code location
 #[macro_export]
-macro_rules! this_code_loc {
+macro_rules! code_location {
     () => {
         const_format::formatcp!("{}:{}", file!(), line!())
     };
@@ -15,7 +15,7 @@ macro_rules! this_code_loc {
 
 /// Compile-time formatted proxy code location
 #[macro_export]
-macro_rules! this_code_loc_proxy {
+macro_rules! code_location_proxy {
     () => {
         const_format::formatcp!(" -> {}:{}", file!(), line!())
     };
@@ -309,7 +309,7 @@ macro_rules! declare_app_errors {
 #[macro_export]
 macro_rules! succ {
     ( $x:expr ) => {
-        $x.map_err(|mut e| { e.append_code_loc(&apptools::this_code_loc_proxy!()); e } )?
+        $x.map_err(|mut e| { e.append_code_loc(&apptools::code_location_proxy!()); e } )?
     };
 }
 
@@ -317,7 +317,7 @@ macro_rules! succ {
 #[macro_export]
 macro_rules! app_err {
     ( $kind: expr, $msg:expr ) => {
-        AppErr::new($kind, apptools::this_code_loc!(), $msg)
+        AppErr::new($kind, apptools::code_location!(), $msg)
     };
 }
 
@@ -325,7 +325,7 @@ macro_rules! app_err {
 #[macro_export]
 macro_rules! neg_result {
     ( $kind: expr, $msg:expr ) => {
-        Err(AppErr::new($kind, apptools::this_code_loc!(), $msg))
+        Err(AppErr::new($kind, apptools::code_location!(), $msg))
     };
 }
 
@@ -334,7 +334,7 @@ macro_rules! neg_result {
 #[macro_export]
 macro_rules! app_err_from_other {
     ( $kind: expr, $msg:expr, $source: expr ) => {
-        AppErr::from_other($kind, apptools::this_code_loc!(), $msg, $source.into())
+        AppErr::from_other($kind, apptools::code_location!(), $msg, $source.into())
     };
 }
 
@@ -343,7 +343,7 @@ macro_rules! app_err_from_other {
 #[macro_export]
 macro_rules! neg_result_from_err {
     ( $kind: expr, $msg:expr, $source: expr ) => {
-        Err(AppErr::from_other($kind, apptools::this_code_loc!(), $msg, $source.into()))
+        Err(AppErr::from_other($kind, apptools::code_location!(), $msg, $source.into()))
     };
 }
 
@@ -356,7 +356,7 @@ macro_rules! neg_result_from_err {
 //         match ($kind) {
 
 //         }
-//         AppErr::from_std($kind, apptools::this_code_loc!(), $msg, $source)
+//         AppErr::from_std($kind, apptools::code_location!(), $msg, $source)
 //     };
 // }
 
@@ -367,7 +367,7 @@ macro_rules! neg_result_from_err {
 macro_rules! app_err_from_std {
     ( $msg:expr, $source: expr ) => {
             
-      AppErr::from_std(apptools::this_code_loc!(), $msg, $source)
+      AppErr::from_std(apptools::code_location!(), $msg, $source)
         
     };
 }

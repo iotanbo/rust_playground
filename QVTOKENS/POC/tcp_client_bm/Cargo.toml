@@ -1,12 +1,15 @@
 [package]
-name = "poc1_tokio_playground"
+name = "tcp_client_bm"
 version = "0.1.0"
-authors = ["iotanbo <yurizappo@gmail.com>"]
+authors = ["iotanbo <61734787+iotanbo@users.noreply.github.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# clap = {version = "3" }
+clap = "3.0.0-beta.2"
+# clap = "3.*"
 futures = { version = "0.3.*" }
 tokio = {version = "1", features = ["full"] }
 log = { version = "0" }

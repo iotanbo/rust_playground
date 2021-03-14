@@ -2,11 +2,11 @@
 # LEARNING RUST
 
 
-## Install Rust on MacOS
+## Install Rust on MacOS, Ubuntu
 
 `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
-* Selected 'default installation'
+* Selected 'default installation' or modify options if required.
 
 
 ```
@@ -85,6 +85,7 @@ CLI
 
 clap 
 https://clap.rs/
+https://github.com/clap-rs/clap
 
 
 Serialization

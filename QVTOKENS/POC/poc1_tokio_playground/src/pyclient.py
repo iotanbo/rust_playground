@@ -12,7 +12,8 @@ RX_TIMEOUT_SEC = 5
 
 async def tcp_echo_client(message):
     try:
-        reader, writer = await asyncio.open_connection('192.168.1.200', 9556)
+        # '192.168.1.200' '127.0.0.1'  '192.168.1.201'
+        reader, writer = await asyncio.open_connection('192.168.1.201', 9556)
         # print('* CONNECTED, sending: %r' % message)
         writer.write(message)
         try:
@@ -52,15 +53,19 @@ async def run_tcp_clients(data_list, total_clients: int):
 if __name__ == '__main__':
 
     data = []
-    for token in range(500):
+    # data.append(bytes(b"\xFF") * 16)
+
+
+    for token in range(1000):
         data.append(token.to_bytes(16, byteorder='little'))
 
     data.append(0xFFFFFF.to_bytes(16, byteorder='little'))
 
     for _ in range(20):
-        asyncio.run(run_tcp_clients(data, 500))
+        asyncio.run(run_tcp_clients(data, 1000))
 
     data[0] = bytes(b"\xFF") * 16
+
     # Extra message to quit the server
     asyncio.run(run_tcp_clients(data, 1))
 

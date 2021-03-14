@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use tokio::time::{self, Duration};
-// use std::net::Shutdown;
+use tokio::sync::{oneshot};
 
 
 use std::time::{SystemTime};
@@ -17,13 +17,17 @@ use log::*;
 
 
 /// Period of time in millis to poll for shutdown
-const SHUTDOWN_POLLING_TIME: u64 = 1000;
+const SHUTDOWN_POLLING_TIME: u64 = 5000;
 
 /// Maximum number of active connections
 const ACTIVE_CONNS_MAX: i64 = 12000;
 
 /// Quit message that initializes server shutdown if received
 const QUIT_MSG: [u8; 16] = [0xFF_u8; 16];
+
+
+//#[derive(Copy, Clone)]
+//struct ShutdownMsg {}
 
 
 struct GlobalState {
@@ -46,6 +50,12 @@ struct GlobalState {
     #[allow(unused)]
     is_shutting_down: Cell<bool>,
 
+    // shutdown_send_handle: RefCell<tokio::sync::oneshot::Sender<ShutdownMsg>>,
+    shutdown_send_handle: RefCell<tokio::sync::oneshot::Sender<u32>>,
+
+    // pub shutdown_rx_handle: RefCell<tokio::sync::oneshot::Receiver<ShutdownMsg>>,
+    pub shutdown_rx_handle: RefCell<tokio::sync::oneshot::Receiver<u32>>,
+
     /// Timestamp of first accepted connection
     pub first_conn_accepted_ts: Cell<SystemTime>,
 
@@ -62,12 +72,16 @@ impl GlobalState {
     /// Initializes global state with default values
     fn init() -> GlobalState {
 
+        let (shutdown_send, shutdown_rx) = oneshot::channel();
+
         let mut gs = GlobalState {
             next_conn_id: Cell::new(0),
             active_conns_cnt: Cell::new(0),
             active_conns_cnt_peak: Cell::new(0),
             requests_cnt: Cell::new(0),
             is_shutting_down: Cell::new(false),
+            shutdown_send_handle: RefCell::new(shutdown_send),
+            shutdown_rx_handle: RefCell::new(shutdown_rx),
             token_table: RefCell::new(HashMap::new()),
 
             /// Timestamp of first accepted connection
@@ -160,6 +174,11 @@ impl GlobalState {
     #[allow(unused)]
     fn init_shutdown(&self) {
         self.is_shutting_down.set(true);
+        // Send shutdown message to exit from accepting loop
+        let shutdown_send_handle = self.shutdown_send_handle.borrow_mut();
+
+        // This does not work!
+        //let _ = shutdown_send_handle.send(0);
     }
 
     /// Checks if token is present in the hash table database and increments associated value.
@@ -319,6 +338,7 @@ pub async fn run_server(port: u16) -> Result<(), Box<dyn std::error::Error>> {
                 match result {
                     Ok(_) => {}
                     Err(_) => {
+
                         if gl_state.is_shutting_down() {
                             info!("  * accept_new_conn stopped, exiting ...");
                         break;
@@ -326,28 +346,22 @@ pub async fn run_server(port: u16) -> Result<(), Box<dyn std::error::Error>> {
                             warn!("  * accept_new_conn error, retrying ...");
                             time::sleep(Duration::from_millis(100)).await;
                         }
+                        
                     }
+
                 }
             },
     
-            // Wait for shutdown, block until `gl_state.is_shutting_down()` returns true
-            _result = async { 
+            // Accept timeout
+            _result = async { trace!("  -> waiting for {} millis started", SHUTDOWN_POLLING_TIME);
+                        time::sleep(Duration::from_millis(SHUTDOWN_POLLING_TIME)).await } => {
 
-                loop {
-                    // check if server is shutting down
-                    if gl_state.is_shutting_down() {
-                        debug!("  * is_shutting_down() returned true in run_server() loop, breaking ...");
-                        // break waiting loop
-                        break;
-                    }
-                    // retry waiting for SHUTDOWN_POLLING_TIME
-                    trace!("  -> waiting for shutdown ({} millis) (re)started", SHUTDOWN_POLLING_TIME);
-                    time::sleep(Duration::from_millis(SHUTDOWN_POLLING_TIME)).await 
+                if gl_state.is_shutting_down() {
+                    info!("  * shutdown detected in run_server() loop, exiting ...");
+                    break;
                 }
-                
-            } => { 
-                // break accepting loop
-                break; 
+
+                trace!("  * accept timeout, retrying...");
             },
         }
 
